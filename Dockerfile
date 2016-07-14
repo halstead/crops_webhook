@@ -6,7 +6,7 @@ ENV CROPS_WEBHOOK_KEY None
 ENV CROPS_WEBHOOK_CONFIG /etc/crops-webhook/crops_webhook.cfg
 
 RUN pip install gunicorn
-RUN git clone -b apptest https://github.com/crops/webhook.git /root/webhook
+RUN git clone https://github.com/crops/webhook.git /root/webhook
 RUN cd /root/webhook && python setup.py install
 RUN mkdir -p /etc/crops-webhook
 ADD crops_webhook.cfg /etc/crops-webhook/crops_webhook.cfg

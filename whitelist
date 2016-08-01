@@ -1,0 +1,2 @@
+[Whitelist]
+yocto-push=TOASTER_CONTAINER_TOKEN PATH

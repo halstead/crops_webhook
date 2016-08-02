@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+#
+# Post receive hook to be used with gitolite.
+# Triggers events on the Yocto Project webhook server.
+
+import os
+import fileinput
+import json
+import hmac
+import hashlib
+import subprocess
+import uuid
+import datetime
+
+token = "SECRETstring"
+
+branches = []
+detail = []
+
+for line in fileinput.input():
+    oldrev, newrev, ref = line.split()
+    detail.append((oldrev, newrev, ref))
+    if 'refs/heads/' in ref:
+        ref = ref[11:]
+    branches.append(ref)
+
+data = {}
+data["repo"] = os.getenv('GL_REPO', 'unknown')
+data["branches"] = branches
+data["detail"] = detail
+data["nonce"] = uuid.uuid1().get_hex()
+data["datetime"] = datetime.datetime.utcnow().isoformat()
+
+payload = json.dumps(data)
+with open('/tmp/post-receive-json', 'a+') as logs:
+    json.dump(data, logs, indent=4)
+
+computed_digest = hmac.new(token, payload, hashlib.sha1).hexdigest()
+
+command = ['curl',  '--silent', '--show-error',
+           '-H', 'X-Hub-Signature: sha1={}'.format(computed_digest),
+           '-H', 'X-GitHub-Event: yocto-push',
+           '-d', payload,
+           'http://webhook.yocto.io:5555/webhook']
+with open('/tmp/post-receive-log', 'ab') as logs:
+    subprocess.call(command, stdout=logs, stderr=logs)

@@ -18,6 +18,7 @@ ADD crops_app.py /opt/webhook/
 RUN mkdir /opt/workdir
 RUN adduser --system webhook
 RUN chown -R webhook /opt /etc/crops-webhook
+RUN chown root:root /etc/crops-webhook/handlers/update_handlers.sh && chmod 555 /etc/crops-webhook/handlers/update_handlers.sh
 ADD whitelist /etc/crops-webhook/whitelist
 
 USER webhook
